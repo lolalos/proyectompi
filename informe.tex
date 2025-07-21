@@ -1,42 +1,4 @@
-%%
-%% This is file `./samples/longsample.tex',
-%% generated with the docstrip utility.
-%%
-%% The original source files were:
-%%
-%% apa7.dtx  (with options: `longsample')
-%% ----------------------------------------------------------------------
-%% 
-%% apa7 - A LaTeX class for formatting documents in compliance with the
-%% American Psychological Association's Publication Manual, 7th edition
-%% 
-%% Copyright (C) 2019 by Daniel A. Weiss <daniel.weiss.led at gmail.com>
-%% 
-%% This work may be distributed and/or modified under the
-%% conditions of the LaTeX Project Public License (LPPL), either
-%% version 1.3c of this license or (at your option) any later
-%% version.  The latest version of this license is in the file:
-%% 
-%% http://www.latex-project.org/lppl.txt
-%% 
-%% Users may freely modify these files without permission, as long as the
-%% copyright line and this statement are maintained intact.
-%% 
-%% This work is not endorsed by, affiliated with, or probably even known
-%% by, the American Psychological Association.
-%% 
-%% ----------------------------------------------------------------------
-%% 
-\documentclass[man]{apa7}
-
-\usepackage{lipsum}
-
-\usepackage[american]{babel}
-
-% \usepackage{natbib} 
-
-\usepackage{csquotes}
-cambia esta parte por esto al mismo estilo (\documentclass[fleqn,10pt]{article}
+\documentclass[fleqn,10pt]{article}
 \usepackage[utf8]{inputenc}
 \usepackage[T1]{fontenc}
 \usepackage{graphicx}
@@ -49,6 +11,9 @@ cambia esta parte por esto al mismo estilo (\documentclass[fleqn,10pt]{article}
 \usepackage{caption}
 \usepackage{hyperref}
 \usepackage{verbatim}
+\usepackage[spanish]{babel}
+\usepackage{csquotes}
+\usepackage{lipsum}
 
 \geometry{a4paper, margin=1in}
 
@@ -95,7 +60,7 @@ cambia esta parte por esto al mismo estilo (\documentclass[fleqn,10pt]{article}
     \vfill
     {\Large\bfseries CURSO: Algoritmos Paralelos y Distribuidos\par}
     \vspace{0.3cm}
-    {\Large\bfseries TRABAJO: Práctica No 12\par}
+    {\Large\bfseries Proyecto: Implementación de proyecto con MPI\par}
     \vspace{0.3cm}
     {\Large\bfseries PROFESOR: Dr. HANS HARLEY CCACYAHUILLCA BEJAR\par}
     \vspace{1cm}
@@ -107,179 +72,91 @@ cambia esta parte por esto al mismo estilo (\documentclass[fleqn,10pt]{article}
 
 \setcounter{page}{1}
 \pagestyle{plain}
-)
 
-\abstract{
+\begin{center}
+    \Large\bfseries RESUMEN
+\end{center}
+\vspace{0.5cm}
 
-In this work, a hierarchical graph partitioning based on optimum cuts in graphs is proposed for unsupervised image segmentation, that can be tailored to the target group of objects, according to their boundary polarity, by extending Oriented Image Foresting Transform (OIFT). The proposed method, named UOIFT, theoretically encompasses as a particular case the single-linkage algorithm by minimum spanning tree (MST) and gives superior segmentation results compared to other approaches commonly used in the literature, usually requiring a lower number of image partitions to accurately isolate the desired regions of interest with known polarity. The method is supported by new theoretical results involving the usage of non-monotonic-incremental cost functions in directed graphs and exploits the local contrast of image regions, being robust in relation to illumination variations and inhomogeneity effects. UOIFT is demonstrated using a region adjacency graph of superpixels in medical and natural images.
+\noindent\textbf{Objetivo del Proyecto}\\
+El propósito fundamental de PROYECTOMPI es resolver el problema del alto costo computacional de la segmentación de imágenes. El proyecto implementa una solución de computación paralela para distribuir la carga de trabajo entre múltiples núcleos de un procesador, reduciendo significativamente el tiempo total de procesamiento.
 
+\vspace{0.5cm}
+\noindent\textbf{Arquitectura y Tecnología}\\
+La solución está desarrollada en C++ por su rendimiento y utiliza dos bibliotecas clave:
 
-}
+\begin{itemize}
+    \item \textbf{OpenCV:} Para todas las operaciones relacionadas con el manejo de imágenes, como lectura, escritura y la aplicación del algoritmo de segmentación (pyrMeanShiftFiltering).
+    
+    \item \textbf{MPI (Message Passing Interface):} Para gestionar toda la comunicación y la paralelización. Permite que el programa se ejecute en múltiples procesos, dividiendo la tarea de manera efectiva.
+\end{itemize}
 
-\keywords{Computer vision, image segmentation}
+El diseño se basa en una estrategia de paralelismo de datos, donde la imagen de entrada se divide en franjas horizontales (filas). Este enfoque es simple y muy eficaz para garantizar que cada proceso reciba una cantidad de trabajo casi idéntica, optimizando el uso de los recursos.
 
-% \authornote{
-%    \addORCIDlink{Daniel A. Weiss}{0000-0000-0000-0000}
+\vspace{0.5cm}
+\noindent\textbf{Implementación y Evaluación}\\
+El código principal (segment.cpp) no solo ejecuta la segmentación, sino que está diseñado como un marco de evaluación de rendimiento. Su característica más importante es la capacidad de medir y reportar automáticamente el tiempo de ejecución y el uso máximo de memoria para cada proceso.
 
-%   Correspondence concerning this article should be addressed to Daniel A. Weiss, Department of Educational Psychology, Counseling and
-%   Special Education, A University Somewhere, 123 Main St., Oneonta, NY
-%   13820.  E-mail: daniel.weiss.led@gmail.com}
-
-\begin{document}
-\maketitle
-
-
-
-
-
-
-
-\section{Method}
+Estas métricas se recolectan en el proceso principal usando MPI\_Gather, lo que permite un análisis detallado del rendimiento, la escalabilidad y el balance de carga de la solución. La ejecución en un entorno como WSL (Ubuntu en Windows) confirma la portabilidad del código, aunque las métricas de rendimiento en este entorno sirven principalmente para validar la lógica y no representan el potencial en un clúster de alto rendimiento.
 
 
+\clearpage
+\section{Introducción}
+La segmentación de imágenes es un proceso fundamental y omnipresente en el campo de la visión por computador, con aplicaciones críticas que abarcan desde el diagnóstico médico y la bioinformática hasta los sistemas de conducción autónoma y el análisis de imágenes satelitales. Su objetivo es particionar una imagen digital en múltiples segmentos o regiones, con el fin de simplificar su representación y facilitar un análisis más profundo y significativo.
 
-\subsection{Participants}
-\lipsum[4]
+Sin embargo, la creciente demanda de imágenes de alta resolución y el uso de algoritmos cada vez más complejos han convertido a la segmentación en un significativo cuello de botella computacional. El procesamiento secuencial de estas tareas en un único núcleo de procesador es a menudo demasiado lento para aplicaciones prácticas, especialmente aquellas que requieren resultados en tiempo real.
 
-\parencite{Borst2011b}
+Para superar este desafío, este proyecto explora y aplica los principios de la computación paralela. La estrategia central consiste en dividir la carga de trabajo de la segmentación y distribuirla entre un conjunto de procesos que se ejecutan simultáneamente. Para ello, se desarrolla una solución en C++ que utiliza el estándar Message Passing Interface (MPI) para orquestar la comunicación y la distribución de tareas, y la biblioteca OpenCV para las operaciones de procesamiento de imágenes. El objetivo final es diseñar, implementar y evaluar un sistema robusto y escalable capaz de acelerar drásticamente el proceso de segmentación, demostrando la viabilidad y el poder del paralelismo en la visión por computador moderna.
 
+\clearpage
+\section{Formulación del Problema}
+El desafío fundamental de este proyecto surge de una tensión inherente en la visión por computador moderna: mientras la disponibilidad de datos visuales de alta resolución (imágenes 4K, gigapíxeles, etc.) ha crecido exponencialmente, las arquitecturas de software tradicionales, basadas en el procesamiento secuencial, no han escalado a la par. La segmentación de imágenes, un proceso cuya complejidad computacional a menudo crece de forma no lineal con el número de píxeles, se convierte en un cuello de botella crítico. Este no es un mero inconveniente técnico; es una barrera que impide el avance práctico en campos que dependen de análisis masivos de imágenes, como la genómica (análisis de tejido celular), la ciencia de materiales o los sistemas de monitoreo en tiempo real, donde una latencia elevada es inaceptable.
 
-\subsection{Materials}
-\lipsum[5]
+A raíz de esta brecha, la pregunta de investigación que guía este proyecto es la siguiente:
+¿Cuáles son los principios de diseño y los compromisos de implementación necesarios para desarrollar una arquitectura de software paralelo que no solo reduzca drásticamente el tiempo de ejecución de algoritmos de segmentación computacionalmente intensivos, sino que también sea inherentemente escalable, portable y verificable en su rendimiento?
 
-\subsection{Design}
-\lipsum[6]
+Responder a esta pregunta global exige la resolución de varios sub-problemas interconectados y de alta criticidad, donde el éxito del proyecto depende de la solución efectiva de cada uno:
 
-\subsection{Procedure}
-\lipsum[7]
+\subsection{El Problema del Balance de Carga y la Ociosidad de Recursos}
+Argumento: En un sistema paralelo, el tiempo total de ejecución está determinado por el proceso que tarda más en finalizar su tarea. Si la imagen se descompone de manera desigual, algunos núcleos de CPU terminarán su trabajo rápidamente y permanecerán inactivos, desperdiciando ciclos de cómputo valiosos. Por lo tanto, el problema no es simplemente "dividir la imagen", sino diseñar una estrategia de descomposición de datos que garantice una distribución de trabajo lo más equitativa posible. Esto debe hacerse, además, con un bajo costo computacional, ya que un algoritmo de particionamiento complejo podría anular las ganancias de tiempo que se buscan.
 
-\subsubsection{Instrument \#1}
-\lipsum[8]
+\subsection{El Problema de la Sobrecarga de Comunicación como Nuevo Cuello de Botella}
+Argumento: Todo algoritmo paralelo es una combinación de cómputo y comunicación. Según la Ley de Amdahl, la aceleración potencial de un programa está limitada por su porción secuencial. En nuestro caso, la comunicación (la distribución inicial de datos y la recolección final de resultados) es una fase inherentemente secuencial o de sincronización. A medida que se añaden más procesos, el tiempo de cómputo por proceso disminuye, pero el volumen total de comunicación puede aumentar o la latencia de la red puede volverse dominante. El problema es, por tanto, diseñar un patrón de comunicación que minimice la latencia y la contención, para evitar que la comunicación misma se convierta en el nuevo cuello de botella que impida la escalabilidad.
 
-\paragraph{Reliability}
-\lipsum[9]
+\subsection{El Problema de la Medición Rigurosa y la Demostración de Escalabilidad}
+Argumento: Una solución paralela no es exitosa simplemente porque "funciona más rápido". Su eficacia debe ser demostrada cuantitativamente. El problema aquí es definir un marco de evaluación riguroso. Esto implica seleccionar métricas clave, como la Aceleración (Speedup) y la Eficiencia, y establecer una metodología de pruebas que permita analizar cómo se comporta la solución a medida que se incrementan los recursos (núcleo de CPU). El objetivo final es demostrar que la arquitectura no solo ofrece una mejora en un caso específico, sino que escala de manera predecible, es decir, que al duplicar los recursos de cómputo, el tiempo de ejecución se reduce de manera casi proporcional, validando así la robustez del diseño paralelo.
 
-\subparagraph{Inter-rater reliability}
-\lipsum[10]
+\section{Antecedentes}
+Para comprender el diseño y la implementación de nuestra solución, es crucial establecer las bases teóricas y tecnológicas sobre las cuales se construye el proyecto. Estos antecedentes abarcan el concepto de segmentación de imágenes, el funcionamiento detallado del algoritmo específico a paralelizar y el paradigma de computación paralela seleccionado.
 
-\subparagraph{Test-retest reliability}
-\lipsum[11]
+\subsection{Segmentación de Imágenes}
+La segmentación de imágenes es un proceso fundamental en la visión por computador que consiste en particionar una imagen digital en múltiples conjuntos de píxeles, conocidos como segmentos o regiones. El objetivo es transformar la representación de la imagen en algo más significativo y fácil de analizar. Esta división no es aleatoria; se basa en la agrupación de píxeles que comparten ciertas características, como la similitud en color, intensidad, textura o proximidad espacial. El resultado es una imagen simplificada donde se pueden identificar objetos, límites y otras estructuras de interés, sirviendo como un paso de preprocesamiento esencial para tareas más complejas como el reconocimiento de objetos, el análisis de escenas o la cuantificación de datos en imágenes médicas.
 
-\paragraph{Validity}
-\lipsum[12]
+\subsection{Algoritmo Base: "Efficient Graph-Based Image Segmentation"}
+El núcleo de este proyecto es la paralelización del algoritmo propuesto por Pedro Felzenszwalb y Daniel Huttenlocher. Este método es ampliamente reconocido por su eficiencia y la alta calidad de sus resultados, logrando un buen equilibrio entre la captura de detalles importantes y la eliminación de ruido. Su lógica se basa en la teoría de grafos.
 
-\subparagraph{Face validity}
-\lipsum[13]
+\textbf{Representación como Grafo:} El algoritmo modela la imagen como un grafo no dirigido $G=(V,E)$, donde el conjunto de vértices $V$ corresponde a los píxeles de la imagen. El conjunto de aristas $E$ conecta pares de píxeles vecinos (normalmente en una vecindad de 8 píxeles). A cada arista se le asigna un peso $w(v_i, v_j)$ que representa la diferencia o disimilitud entre los píxeles $v_i$ y $v_j$ (por ejemplo, la distancia euclidiana en el espacio de color RGB).
 
-\subparagraph{Construct validity}
-\lipsum[14]
+\textbf{Predicado de Fusión:} La decisión de fusionar dos componentes (segmentos) se basa en un predicado que evalúa si la diferencia entre los componentes es pequeña en relación con la diferencia dentro de los mismos. Se define la diferencia interna de un componente $C$ como la arista de mayor peso dentro de su árbol de expansión mínima, $Int(C)=\max_{e \in MST(C,E)} w(e)$. Luego, se define la diferencia mínima interna entre dos componentes $C_1$ y $C_2$ como $MInt(C_1, C_2) = \min(Int(C_1)+\tau(C_1), Int(C_2)+\tau(C_2))$, donde $\tau(C)=k/|C|$ es un umbral que depende de un parámetro $k$ y del tamaño del componente. Dos componentes se fusionan si el peso de la arista que los conecta es menor o igual a esta diferencia mínima interna.
 
-\section{Results}
-algo \cite{han2022vision}.
+\textbf{Pasos del Algoritmo:}
+\begin{enumerate}
+    \item Se ordenan todas las aristas $E$ del grafo en orden no decreciente de su peso $w$.
+    \item Se inicializa la segmentación con cada píxel siendo su propio componente.
+    \item Se recorre la lista ordenada de aristas. Para cada arista, si los dos vértices que conecta pertenecen a componentes distintos y el predicado de fusión se cumple, dichos componentes se fusionan.
+    \item El proceso termina después de haber considerado todas las aristas.
+\end{enumerate}
 
+Este enfoque greedy es eficaz porque al procesar las aristas de menor peso primero, se asegura que las fusiones se realicen sobre la base de las similitudes más fuertes, y el predicado adaptativo previene la fusión de componentes que son visiblemente distintos.
 
+\subsection{Computación Paralela y el Estándar MPI}
+Si bien el algoritmo de Felzenszwalb-Huttenlocher es eficiente en su ejecución secuencial, el procesamiento de imágenes de alta resolución (megapíxeles) aún puede demandar un tiempo considerable. La computación paralela ofrece la solución a este problema al dividir la carga de trabajo.
 
-\section{Discussion}
+Para este proyecto, se ha elegido el modelo de memoria distribuida implementado a través del Message Passing Interface (MPI). MPI no es una biblioteca, sino una especificación estándar para la comunicación entre procesos que pueden estar ejecutándose en los núcleos de una misma máquina o en diferentes nodos de un clúster.
 
-
-
-
-\lipsum[17]
-
-\lipsum[18]
-
-\lipsum[19]
-
-\printbibliography
-
-\appendix
-
-\section{Instrument}
-\label{app:instrument}
-
-As shown in Figure~\ref{fig:Figure2}, these results are impressive. \lipsum[20]
-
-\begin{figure}
-    \caption{This is my second figure caption.}
-    \includegraphics[bb=0in 0in 2.5in 2.5in, height=2.5in, width=2.5in]{Figure1.pdf}
-    \label{fig:Figure2}
-\end{figure}
-
-\lipsum[21]
-\section{Pilot Data}
-\label{app:surveydata}
-
-The detailed results are shown in Table~\ref{tab:DeckedTable}. \lipsum[22]
-
-\begin{table}
-  \begin{threeparttable}
-    \caption{A More Complex Decked Table}
-    \label{tab:DeckedTable}
-    \begin{tabular}{@{}lrrr@{}}         \toprule
-    Distribution type  & \multicolumn{2}{l}{Percentage of} & Total number   \\
-                       & \multicolumn{2}{l}{targets with}  & of trials per  \\
-                       & \multicolumn{2}{l}{segment in}    & participant    \\ \cmidrule(r){2-3}
-                                    &  Onset  &  Coda            &          \\ \midrule
-    Categorical -- onset\tabfnm{a}  &    100  &     0            &  196     \\
-    Probabilistic                   &     80  &    20\tabfnm{*}  &  200     \\
-    Categorical -- coda\tabfnm{b}   &      0  &   100\tabfnm{*}  &  196     \\ \midrule
-    \end{tabular}
-    \begin{tablenotes}[para,flushleft]
-        {\small
-            \textit{Note.} All data are approximate.
-
-            \tabfnt{a}Categorical may be onset.
-            \tabfnt{b}Categorical may also be coda.
-
-            \tabfnt{*}\textit{p} < .05.
-            \tabfnt{**}\textit{p} < .01.
-         }
-    \end{tablenotes}
-  \end{threeparttable}
-\end{table}
-
-\lipsum[23]
-
-\end{document}
-
-%% 
-%% Copyright (C) 2019 by Daniel A. Weiss <daniel.weiss.led at gmail.com>
-%% 
-%% This work may be distributed and/or modified under the
-%% conditions of the LaTeX Project Public License (LPPL), either
-%% version 1.3c of this license or (at your option) any later
-%% version.  The latest version of this license is in the file:
-%% 
-%% http://www.latex-project.org/lppl.txt
-%% 
-%% Users may freely modify these files without permission, as long as the
-%% copyright line and this statement are maintained intact.
-%% 
-%% This work is not endorsed by, affiliated with, or probably even known
-%% by, the American Psychological Association.
-%% 
-%% This work is "maintained" (as per LPPL maintenance status) by
-%% Daniel A. Weiss.
-%% 
-%% This work consists of the file  apa7.dtx
-%% and the derived files           apa7.ins,
-%%                                 apa7.cls,
-%%                                 apa7.pdf,
-%%                                 README,
-%%                                 APA7american.txt,
-%%                                 APA7british.txt,
-%%                                 APA7dutch.txt,
-%%                                 APA7english.txt,
-%%                                 APA7german.txt,
-%%                                 APA7ngerman.txt,
-%%                                 APA7greek.txt,
-%%                                 APA7czech.txt,
-%%                                 APA7turkish.txt,
-%%                                 APA7endfloat.cfg,
-%%                                 Figure1.pdf,
-%%                                 shortsample.tex,
-%%                                 longsample.tex, and
-%%                                 bibliography.bib.
-%% 
-%%
-%% End of file `./samples/longsample.tex'.
+\textbf{Justificación de la elección:}
+\begin{itemize}
+    \item \textbf{Escalabilidad:} MPI está diseñado para escalar desde unos pocos procesos hasta miles, lo que lo hace ideal para abordar problemas de cualquier tamaño, limitados únicamente por el hardware disponible.
+    \item \textbf{Portabilidad:} El código escrito con la API de MPI es altamente portable entre diferentes arquitecturas de hardware y sistemas operativos, garantizando que nuestra solución no esté atada a una plataforma específica.
+    \item \textbf{Control Explícito:} MPI otorga al programador un control explícito sobre la comunicación, lo que permite diseñar y optimizar patrones de envío y recepción de datos (\texttt{MPI\_Send}, \texttt{MPI\_Recv}), así como operaciones colectivas (\texttt{MPI\_Bcast}, \texttt{MPI\_Gather}) que son fundamentales para la distribución inicial de la tarea y la recolección final de los resultados en nuestra solución diseñada.
+\end{itemize}
