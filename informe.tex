@@ -1,0 +1,285 @@
+%%
+%% This is file `./samples/longsample.tex',
+%% generated with the docstrip utility.
+%%
+%% The original source files were:
+%%
+%% apa7.dtx  (with options: `longsample')
+%% ----------------------------------------------------------------------
+%% 
+%% apa7 - A LaTeX class for formatting documents in compliance with the
+%% American Psychological Association's Publication Manual, 7th edition
+%% 
+%% Copyright (C) 2019 by Daniel A. Weiss <daniel.weiss.led at gmail.com>
+%% 
+%% This work may be distributed and/or modified under the
+%% conditions of the LaTeX Project Public License (LPPL), either
+%% version 1.3c of this license or (at your option) any later
+%% version.  The latest version of this license is in the file:
+%% 
+%% http://www.latex-project.org/lppl.txt
+%% 
+%% Users may freely modify these files without permission, as long as the
+%% copyright line and this statement are maintained intact.
+%% 
+%% This work is not endorsed by, affiliated with, or probably even known
+%% by, the American Psychological Association.
+%% 
+%% ----------------------------------------------------------------------
+%% 
+\documentclass[man]{apa7}
+
+\usepackage{lipsum}
+
+\usepackage[american]{babel}
+
+% \usepackage{natbib} 
+
+\usepackage{csquotes}
+cambia esta parte por esto al mismo estilo (\documentclass[fleqn,10pt]{article}
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage{graphicx}
+\usepackage{geometry}
+\usepackage{amsmath,amssymb}
+\usepackage{listings}
+\usepackage{xcolor}
+\usepackage{tcolorbox}
+\usepackage{booktabs}
+\usepackage{caption}
+\usepackage{hyperref}
+\usepackage{verbatim}
+
+\geometry{a4paper, margin=1in}
+
+% Estilo para código Python y C++
+\definecolor{codegreen}{rgb}{0,0.6,0}
+\definecolor{codegray}{rgb}{0.5,0.5,0.5}
+\definecolor{codepurple}{rgb}{0.58,0,0.82}
+\definecolor{backcolour}{rgb}{0.95,0.95,0.92}
+
+\lstdefinestyle{cppstyle}{
+    backgroundcolor=\color{backcolour},
+    commentstyle=\color{codegreen},
+    keywordstyle=\color{magenta},
+    numberstyle=\tiny\color{codegray},
+    stringstyle=\color{codepurple},
+    basicstyle=\ttfamily\footnotesize,
+    breaklines=true,
+    captionpos=b,
+    keepspaces=true,
+    tabsize=2,
+    language=C++,
+    showstringspaces=false,
+    numbers=left,
+    numbersep=5pt,
+    frame=single,
+    rulecolor=\color{black}
+}
+
+\lstset{style=cppstyle}
+
+\begin{document}
+
+%---------------------- portada ----------------------
+\begin{titlepage}
+    \centering
+    \vspace*{1cm}
+    {\LARGE\bfseries UNIVERSIDAD NACIONAL DE SAN ANTONIO ABAD DEL CUSCO\par}
+    \vspace{0.5cm}
+    {\Large FACULTAD DE INGENIERÍA ELÉCTRICA, ELECTRÓNICA, INFORMÁTICA Y MECÁNICA\par}
+    \vspace{0.5cm}
+    {\Large ESCUELA PROFESIONAL DE INGENIERÍA INFORMÁTICA Y DE SISTEMAS\par}
+    \vfill
+    \includegraphics[width=0.25\linewidth]{Escudo_UNSAAC.png}\par
+    \vfill
+    {\Large\bfseries CURSO: Algoritmos Paralelos y Distribuidos\par}
+    \vspace{0.3cm}
+    {\Large\bfseries TRABAJO: Práctica No 12\par}
+    \vspace{0.3cm}
+    {\Large\bfseries PROFESOR: Dr. HANS HARLEY CCACYAHUILLCA BEJAR\par}
+    \vspace{1cm}
+    {\Large\bfseries ALUMNO: EFRAIN VITORINO MARÍN\par}
+    {\Large\bfseries CÓDIGO: 160337\par}
+    \vfill
+    {\Large 2025-I\par}
+\end{titlepage}
+
+\setcounter{page}{1}
+\pagestyle{plain}
+)
+
+\abstract{
+
+In this work, a hierarchical graph partitioning based on optimum cuts in graphs is proposed for unsupervised image segmentation, that can be tailored to the target group of objects, according to their boundary polarity, by extending Oriented Image Foresting Transform (OIFT). The proposed method, named UOIFT, theoretically encompasses as a particular case the single-linkage algorithm by minimum spanning tree (MST) and gives superior segmentation results compared to other approaches commonly used in the literature, usually requiring a lower number of image partitions to accurately isolate the desired regions of interest with known polarity. The method is supported by new theoretical results involving the usage of non-monotonic-incremental cost functions in directed graphs and exploits the local contrast of image regions, being robust in relation to illumination variations and inhomogeneity effects. UOIFT is demonstrated using a region adjacency graph of superpixels in medical and natural images.
+
+
+}
+
+\keywords{Computer vision, image segmentation}
+
+% \authornote{
+%    \addORCIDlink{Daniel A. Weiss}{0000-0000-0000-0000}
+
+%   Correspondence concerning this article should be addressed to Daniel A. Weiss, Department of Educational Psychology, Counseling and
+%   Special Education, A University Somewhere, 123 Main St., Oneonta, NY
+%   13820.  E-mail: daniel.weiss.led@gmail.com}
+
+\begin{document}
+\maketitle
+
+
+
+
+
+
+
+\section{Method}
+
+
+
+\subsection{Participants}
+\lipsum[4]
+
+\parencite{Borst2011b}
+
+
+\subsection{Materials}
+\lipsum[5]
+
+\subsection{Design}
+\lipsum[6]
+
+\subsection{Procedure}
+\lipsum[7]
+
+\subsubsection{Instrument \#1}
+\lipsum[8]
+
+\paragraph{Reliability}
+\lipsum[9]
+
+\subparagraph{Inter-rater reliability}
+\lipsum[10]
+
+\subparagraph{Test-retest reliability}
+\lipsum[11]
+
+\paragraph{Validity}
+\lipsum[12]
+
+\subparagraph{Face validity}
+\lipsum[13]
+
+\subparagraph{Construct validity}
+\lipsum[14]
+
+\section{Results}
+algo \cite{han2022vision}.
+
+
+
+\section{Discussion}
+
+
+
+
+\lipsum[17]
+
+\lipsum[18]
+
+\lipsum[19]
+
+\printbibliography
+
+\appendix
+
+\section{Instrument}
+\label{app:instrument}
+
+As shown in Figure~\ref{fig:Figure2}, these results are impressive. \lipsum[20]
+
+\begin{figure}
+    \caption{This is my second figure caption.}
+    \includegraphics[bb=0in 0in 2.5in 2.5in, height=2.5in, width=2.5in]{Figure1.pdf}
+    \label{fig:Figure2}
+\end{figure}
+
+\lipsum[21]
+\section{Pilot Data}
+\label{app:surveydata}
+
+The detailed results are shown in Table~\ref{tab:DeckedTable}. \lipsum[22]
+
+\begin{table}
+  \begin{threeparttable}
+    \caption{A More Complex Decked Table}
+    \label{tab:DeckedTable}
+    \begin{tabular}{@{}lrrr@{}}         \toprule
+    Distribution type  & \multicolumn{2}{l}{Percentage of} & Total number   \\
+                       & \multicolumn{2}{l}{targets with}  & of trials per  \\
+                       & \multicolumn{2}{l}{segment in}    & participant    \\ \cmidrule(r){2-3}
+                                    &  Onset  &  Coda            &          \\ \midrule
+    Categorical -- onset\tabfnm{a}  &    100  &     0            &  196     \\
+    Probabilistic                   &     80  &    20\tabfnm{*}  &  200     \\
+    Categorical -- coda\tabfnm{b}   &      0  &   100\tabfnm{*}  &  196     \\ \midrule
+    \end{tabular}
+    \begin{tablenotes}[para,flushleft]
+        {\small
+            \textit{Note.} All data are approximate.
+
+            \tabfnt{a}Categorical may be onset.
+            \tabfnt{b}Categorical may also be coda.
+
+            \tabfnt{*}\textit{p} < .05.
+            \tabfnt{**}\textit{p} < .01.
+         }
+    \end{tablenotes}
+  \end{threeparttable}
+\end{table}
+
+\lipsum[23]
+
+\end{document}
+
+%% 
+%% Copyright (C) 2019 by Daniel A. Weiss <daniel.weiss.led at gmail.com>
+%% 
+%% This work may be distributed and/or modified under the
+%% conditions of the LaTeX Project Public License (LPPL), either
+%% version 1.3c of this license or (at your option) any later
+%% version.  The latest version of this license is in the file:
+%% 
+%% http://www.latex-project.org/lppl.txt
+%% 
+%% Users may freely modify these files without permission, as long as the
+%% copyright line and this statement are maintained intact.
+%% 
+%% This work is not endorsed by, affiliated with, or probably even known
+%% by, the American Psychological Association.
+%% 
+%% This work is "maintained" (as per LPPL maintenance status) by
+%% Daniel A. Weiss.
+%% 
+%% This work consists of the file  apa7.dtx
+%% and the derived files           apa7.ins,
+%%                                 apa7.cls,
+%%                                 apa7.pdf,
+%%                                 README,
+%%                                 APA7american.txt,
+%%                                 APA7british.txt,
+%%                                 APA7dutch.txt,
+%%                                 APA7english.txt,
+%%                                 APA7german.txt,
+%%                                 APA7ngerman.txt,
+%%                                 APA7greek.txt,
+%%                                 APA7czech.txt,
+%%                                 APA7turkish.txt,
+%%                                 APA7endfloat.cfg,
+%%                                 Figure1.pdf,
+%%                                 shortsample.tex,
+%%                                 longsample.tex, and
+%%                                 bibliography.bib.
+%% 
+%%
+%% End of file `./samples/longsample.tex'.
