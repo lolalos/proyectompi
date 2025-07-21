@@ -1,4 +1,4 @@
-# Documentación Detallada: Segmentación de Imágenes en Paralelo con MPI y OpenCV
+# Segmentación de Imágenes en Paralelo con MPI y OpenCV
 
 Esta documentación explica paso a paso la implementación de un programa de segmentación de imágenes que utiliza paralelismo mediante MPI (Message Passing Interface) y OpenCV.
 
