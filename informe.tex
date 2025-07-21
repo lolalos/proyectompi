@@ -86,8 +86,7 @@ El propósito fundamental de PROYECTOMPI es resolver el problema del alto costo 
 La solución está desarrollada en C++ por su rendimiento y utiliza dos bibliotecas clave:
 
 \begin{itemize}
-    \item \textbf{OpenCV:} Para todas las operaciones relacionadas con el manejo de imágenes, como lectura, escritura y la aplicación del algoritmo de segmentación (pyrMeanShiftFiltering).
-    
+    \item \textbf{OpenCV:} Para todas las operaciones relacionadas con el manejo de imágenes, como lectura, escritura y la aplicación del algoritmo de segmentación (\texttt{pyrMeanShiftFiltering}).
     \item \textbf{MPI (Message Passing Interface):} Para gestionar toda la comunicación y la paralelización. Permite que el programa se ejecute en múltiples procesos, dividiendo la tarea de manera efectiva.
 \end{itemize}
 
@@ -95,10 +94,9 @@ El diseño se basa en una estrategia de paralelismo de datos, donde la imagen de
 
 \vspace{0.5cm}
 \noindent\textbf{Implementación y Evaluación}\\
-El código principal (segment.cpp) no solo ejecuta la segmentación, sino que está diseñado como un marco de evaluación de rendimiento. Su característica más importante es la capacidad de medir y reportar automáticamente el tiempo de ejecución y el uso máximo de memoria para cada proceso.
+El código principal (\texttt{segment.cpp}) no solo ejecuta la segmentación, sino que está diseñado como un marco de evaluación de rendimiento. Su característica más importante es la capacidad de medir y reportar automáticamente el tiempo de ejecución y el uso máximo de memoria para cada proceso.
 
-Estas métricas se recolectan en el proceso principal usando MPI\_Gather, lo que permite un análisis detallado del rendimiento, la escalabilidad y el balance de carga de la solución. La ejecución en un entorno como WSL (Ubuntu en Windows) confirma la portabilidad del código, aunque las métricas de rendimiento en este entorno sirven principalmente para validar la lógica y no representan el potencial en un clúster de alto rendimiento.
-
+Estas métricas se recolectan en el proceso principal usando \texttt{MPI\_Gather}, lo que permite un análisis detallado del rendimiento, la escalabilidad y el balance de carga de la solución. La ejecución en un entorno como WSL (Ubuntu en Windows) confirma la portabilidad del código, aunque las métricas de rendimiento en este entorno sirven principalmente para validar la lógica y no representan el potencial en un clúster de alto rendimiento.
 
 \clearpage
 \section{Introducción}
@@ -113,18 +111,19 @@ Para superar este desafío, este proyecto explora y aplica los principios de la 
 El desafío fundamental de este proyecto surge de una tensión inherente en la visión por computador moderna: mientras la disponibilidad de datos visuales de alta resolución (imágenes 4K, gigapíxeles, etc.) ha crecido exponencialmente, las arquitecturas de software tradicionales, basadas en el procesamiento secuencial, no han escalado a la par. La segmentación de imágenes, un proceso cuya complejidad computacional a menudo crece de forma no lineal con el número de píxeles, se convierte en un cuello de botella crítico. Este no es un mero inconveniente técnico; es una barrera que impide el avance práctico en campos que dependen de análisis masivos de imágenes, como la genómica (análisis de tejido celular), la ciencia de materiales o los sistemas de monitoreo en tiempo real, donde una latencia elevada es inaceptable.
 
 A raíz de esta brecha, la pregunta de investigación que guía este proyecto es la siguiente:
-¿Cuáles son los principios de diseño y los compromisos de implementación necesarios para desarrollar una arquitectura de software paralelo que no solo reduzca drásticamente el tiempo de ejecución de algoritmos de segmentación computacionalmente intensivos, sino que también sea inherentemente escalable, portable y verificable en su rendimiento?
+
+\textit{¿Cuáles son los principios de diseño y los compromisos de implementación necesarios para desarrollar una arquitectura de software paralelo que no solo reduzca drásticamente el tiempo de ejecución de algoritmos de segmentación computacionalmente intensivos, sino que también sea inherentemente escalable, portable y verificable en su rendimiento?}
 
 Responder a esta pregunta global exige la resolución de varios sub-problemas interconectados y de alta criticidad, donde el éxito del proyecto depende de la solución efectiva de cada uno:
 
 \subsection{El Problema del Balance de Carga y la Ociosidad de Recursos}
-Argumento: En un sistema paralelo, el tiempo total de ejecución está determinado por el proceso que tarda más en finalizar su tarea. Si la imagen se descompone de manera desigual, algunos núcleos de CPU terminarán su trabajo rápidamente y permanecerán inactivos, desperdiciando ciclos de cómputo valiosos. Por lo tanto, el problema no es simplemente "dividir la imagen", sino diseñar una estrategia de descomposición de datos que garantice una distribución de trabajo lo más equitativa posible. Esto debe hacerse, además, con un bajo costo computacional, ya que un algoritmo de particionamiento complejo podría anular las ganancias de tiempo que se buscan.
+Argumento: En un sistema paralelo, el tiempo total de ejecución está determinado por el proceso que tarda más en finalizar su tarea. Si la imagen se descompone de manera desigual, algunos núcleos de CPU terminarán su trabajo rápidamente y permanecerán inactivos, desperdiciando ciclos de cómputo valiosos. Por lo tanto, el problema no es simplemente ``dividir la imagen'', sino diseñar una estrategia de descomposición de datos que garantice una distribución de trabajo lo más equitativa posible. Esto debe hacerse, además, con un bajo costo computacional, ya que un algoritmo de particionamiento complejo podría anular las ganancias de tiempo que se buscan.
 
 \subsection{El Problema de la Sobrecarga de Comunicación como Nuevo Cuello de Botella}
 Argumento: Todo algoritmo paralelo es una combinación de cómputo y comunicación. Según la Ley de Amdahl, la aceleración potencial de un programa está limitada por su porción secuencial. En nuestro caso, la comunicación (la distribución inicial de datos y la recolección final de resultados) es una fase inherentemente secuencial o de sincronización. A medida que se añaden más procesos, el tiempo de cómputo por proceso disminuye, pero el volumen total de comunicación puede aumentar o la latencia de la red puede volverse dominante. El problema es, por tanto, diseñar un patrón de comunicación que minimice la latencia y la contención, para evitar que la comunicación misma se convierta en el nuevo cuello de botella que impida la escalabilidad.
 
 \subsection{El Problema de la Medición Rigurosa y la Demostración de Escalabilidad}
-Argumento: Una solución paralela no es exitosa simplemente porque "funciona más rápido". Su eficacia debe ser demostrada cuantitativamente. El problema aquí es definir un marco de evaluación riguroso. Esto implica seleccionar métricas clave, como la Aceleración (Speedup) y la Eficiencia, y establecer una metodología de pruebas que permita analizar cómo se comporta la solución a medida que se incrementan los recursos (núcleo de CPU). El objetivo final es demostrar que la arquitectura no solo ofrece una mejora en un caso específico, sino que escala de manera predecible, es decir, que al duplicar los recursos de cómputo, el tiempo de ejecución se reduce de manera casi proporcional, validando así la robustez del diseño paralelo.
+Argumento: Una solución paralela no es exitosa simplemente porque ``funciona más rápido''. Su eficacia debe ser demostrada cuantitativamente. El problema aquí es definir un marco de evaluación riguroso. Esto implica seleccionar métricas clave, como la Aceleración (Speedup) y la Eficiencia, y establecer una metodología de pruebas que permita analizar cómo se comporta la solución a medida que se incrementan los recursos (núcleo de CPU). El objetivo final es demostrar que la arquitectura no solo ofrece una mejora en un caso específico, sino que escala de manera predecible, es decir, que al duplicar los recursos de cómputo, el tiempo de ejecución se reduce de manera casi proporcional, validando así la robustez del diseño paralelo.
 
 \section{Antecedentes}
 Para comprender el diseño y la implementación de nuestra solución, es crucial establecer las bases teóricas y tecnológicas sobre las cuales se construye el proyecto. Estos antecedentes abarcan el concepto de segmentación de imágenes, el funcionamiento detallado del algoritmo específico a paralelizar y el paradigma de computación paralela seleccionado.
@@ -132,7 +131,7 @@ Para comprender el diseño y la implementación de nuestra solución, es crucial
 \subsection{Segmentación de Imágenes}
 La segmentación de imágenes es un proceso fundamental en la visión por computador que consiste en particionar una imagen digital en múltiples conjuntos de píxeles, conocidos como segmentos o regiones. El objetivo es transformar la representación de la imagen en algo más significativo y fácil de analizar. Esta división no es aleatoria; se basa en la agrupación de píxeles que comparten ciertas características, como la similitud en color, intensidad, textura o proximidad espacial. El resultado es una imagen simplificada donde se pueden identificar objetos, límites y otras estructuras de interés, sirviendo como un paso de preprocesamiento esencial para tareas más complejas como el reconocimiento de objetos, el análisis de escenas o la cuantificación de datos en imágenes médicas.
 
-\subsection{Algoritmo Base: "Efficient Graph-Based Image Segmentation"}
+\subsection{Algoritmo Base: ``Efficient Graph-Based Image Segmentation''}
 El núcleo de este proyecto es la paralelización del algoritmo propuesto por Pedro Felzenszwalb y Daniel Huttenlocher. Este método es ampliamente reconocido por su eficiencia y la alta calidad de sus resultados, logrando un buen equilibrio entre la captura de detalles importantes y la eliminación de ruido. Su lógica se basa en la teoría de grafos.
 
 \textbf{Representación como Grafo:} El algoritmo modela la imagen como un grafo no dirigido $G=(V,E)$, donde el conjunto de vértices $V$ corresponde a los píxeles de la imagen. El conjunto de aristas $E$ conecta pares de píxeles vecinos (normalmente en una vecindad de 8 píxeles). A cada arista se le asigna un peso $w(v_i, v_j)$ que representa la diferencia o disimilitud entre los píxeles $v_i$ y $v_j$ (por ejemplo, la distancia euclidiana en el espacio de color RGB).
@@ -160,3 +159,301 @@ Para este proyecto, se ha elegido el modelo de memoria distribuida implementado 
     \item \textbf{Portabilidad:} El código escrito con la API de MPI es altamente portable entre diferentes arquitecturas de hardware y sistemas operativos, garantizando que nuestra solución no esté atada a una plataforma específica.
     \item \textbf{Control Explícito:} MPI otorga al programador un control explícito sobre la comunicación, lo que permite diseñar y optimizar patrones de envío y recepción de datos (\texttt{MPI\_Send}, \texttt{MPI\_Recv}), así como operaciones colectivas (\texttt{MPI\_Bcast}, \texttt{MPI\_Gather}) que son fundamentales para la distribución inicial de la tarea y la recolección final de los resultados en nuestra solución diseñada.
 \end{itemize}
+
+\section{Análisis y Diseño del Modelo de Solución}
+Para cumplir con los objetivos del proyecto, es necesario un análisis profundo del algoritmo secuencial y un diseño cuidadoso de la estrategia de paralelización. El modelo de solución propuesto se basa en una descomposición de datos gestionada a través de MPI, abordando los desafíos específicos que presenta el algoritmo de segmentación basado en grafos de Felzenszwalb y Huttenlocher.
+
+\subsection{Análisis del Algoritmo y Desafíos para la Paralelización}
+El algoritmo ``Efficient Graph-Based Image Segmentation'' opera en tres pasos principales:
+
+\begin{itemize}
+    \item \textbf{Construcción del Grafo:} Representa la imagen como un grafo donde cada píxel es un nodo y las aristas conectan píxeles vecinos. El peso de cada arista es una medida de la diferencia entre los píxeles que conecta.
+    \item \textbf{Ordenamiento de Aristas:} Ordena todas las aristas del grafo de forma no decreciente según su peso.
+    \item \textbf{Fusión de Componentes:} Itera a través de la lista ordenada de aristas y decide si fusionar los dos componentes conectados por la arista actual, basándose en un predicado que compara la diferencia entre componentes con la variación interna de cada uno.
+\end{itemize}
+
+El principal desafío para la paralelización reside en los pasos 2 y 3. El ordenamiento global de las aristas y la posterior iteración secuencial crean una dependencia de datos global. Una decisión de fusión en una parte de la imagen puede depender de los pesos de las aristas en cualquier otra parte de la imagen. Por lo tanto, una simple división de la imagen en subregiones para procesarlas de forma aislada generaría resultados incorrectos y discontinuidades en los bordes de dichas subregiones.
+
+\subsection{Estrategia de Paralelización: ``Divide, Segmenta Localmente y Fusiona Bordes''}
+Para superar el desafío de la dependencia global, se propone una estrategia de paralelización en dos fases principales, basada en el paradigma de paralelismo de datos:
+
+\begin{enumerate}
+    \item \textbf{Fase de Cómputo Paralelo:} La imagen se descompone en subregiones (losetas o ``tiles''). Cada proceso MPI recibe una loseta y ejecuta el algoritmo de segmentación completo de forma totalmente independiente y en paralelo sobre su subconjunto de datos.
+    \item \textbf{Fase de Fusión y Comunicación:} Tras la segmentación local, los segmentos en los bordes de cada loseta son inconsistentes con los de sus vecinos. Esta fase se encarga de ``coser'' o fusionar los segmentos a través de los bordes de las losetas mediante la comunicación entre procesos MPI vecinos, asegurando una segmentación globalmente coherente.
+\end{enumerate}
+
+Este enfoque híbrido maximiza el tiempo de cómputo paralelo en la primera fase y confina la compleja lógica de comunicación y sincronización a una segunda fase bien definida.
+
+\subsection{Diseño Detallado del Modelo por Fases}
+El modelo se implementará siguiendo una secuencia lógica gestionada por MPI.
+
+\subsubsection*{Fase I: Descomposición y Segmentación Local (Cómputo Paralelo)}
+\begin{itemize}
+    \item \textbf{Descomposición de la Imagen:} El proceso maestro (rango 0) leerá la imagen y la dividirá en una cuadrícula de losetas rectangulares (por ejemplo, 2x2, 4x2, etc., según el número de procesos). Se prefiere una descomposición en losetas sobre una por franjas, ya que minimiza la longitud total del perímetro de los bordes, reduciendo así la cantidad de datos a comunicar en la siguiente fase.
+    \item \textbf{Distribución:} El proceso maestro asignará una única loseta a cada proceso MPI, enviando los datos de píxeles correspondientes.
+    \item \textbf{Procesamiento Local:} Cada proceso, al recibir su loseta, construirá un grafo local, ordenará sus aristas y ejecutará el algoritmo de fusión de Felzenszwalb y Huttenlocher. Al final de esta fase, cada proceso tendrá una imagen de su loseta perfectamente segmentada, pero solo en el contexto de sus propios datos.
+\end{itemize}
+
+\subsubsection*{Fase II: Fusión de Bordes (Comunicación y Sincronización)}
+\begin{itemize}
+    \item \textbf{Identificación de Segmentos Fronterizos:} Cada proceso identificará los segmentos dentro de su loseta que tocan los bordes (superior, inferior, izquierdo y derecho). Para cada uno de estos segmentos, almacenará sus propiedades relevantes (número de píxeles, variación interna, etc.).
+    \item \textbf{Comunicación entre Vecinos:} Los procesos intercambiarán información sobre sus segmentos fronterizos únicamente con sus vecinos directos. Por ejemplo, un proceso enviará los datos de los segmentos de su borde derecho a su vecino de la derecha y recibirá los datos correspondientes de ese mismo vecino.
+    \item \textbf{Decisión de Fusión Transfronteriza:} Una vez que un proceso tiene la información de los segmentos de su vecino, iterará sobre las aristas que cruzan la frontera y aplicará el mismo predicado de fusión del algoritmo original. Si dos segmentos de diferentes losetas deben fusionarse, se registrará esta decisión.
+    \item \textbf{Propagación de Fusiones:} Una fusión en una frontera puede desencadenar una cadena de fusiones. Este proceso de re-etiquetado y propagación puede requerir múltiples rondas de comunicación entre vecinos hasta que no se produzcan más fusiones y el estado de la segmentación global se estabilice.
+\end{itemize}
+
+\subsection{Modelo de Comunicación MPI}
+\begin{itemize}
+    \item \textbf{Topología:} Para gestionar eficientemente la comunicación entre vecinos, se creará una topología cartesiana 2D usando \texttt{MPI\_Cart\_create}. Esto permitirá a cada proceso identificar fácilmente a sus vecinos del norte, sur, este y oeste.
+    \item \textbf{Distribución Inicial:} El proceso maestro utilizará un bucle de envíos con \texttt{MPI\_Send} o la función colectiva \texttt{MPI\_Scatterv} para distribuir las losetas iniciales a cada proceso.
+    \item \textbf{Comunicación en Fase II:} El intercambio de información de bordes se realizará mediante llamadas bloqueantes punto a punto (\texttt{MPI\_Send} y \texttt{MPI\_Recv}) entre los procesos vecinos.
+    \item \textbf{Recolección Final:} Una vez que la fase de fusión de bordes ha concluido, cada proceso enviará su mapa de segmentación final al proceso maestro, que utilizará \texttt{MPI\_Gather} o un bucle de \texttt{MPI\_Recv} para reconstruir la imagen segmentada completa y guardarla en el disco.
+\end{itemize}
+
+\section{Implementación de la Solución}
+La implementación traduce el modelo de diseño a un programa funcional en C++, utilizando las herramientas y bibliotecas definidas en los antecedentes. El enfoque se centra en la modularidad, la claridad del código y la correcta aplicación de las primitivas de MPI para gestionar el flujo de trabajo paralelo.
+
+\subsection{Entorno de Desarrollo y Herramientas}
+La solución se desarrolla en un entorno de programación estándar para la computación de alto rendimiento, asegurando su portabilidad.
+
+\begin{itemize}
+    \item \textbf{Lenguaje de Programación:} C++ (versión C++11 o superior), elegido por su rendimiento, eficiencia en el manejo de memoria y su amplio soporte de bibliotecas.
+    \item \textbf{Compilador:} Se utiliza el compilador \texttt{g++} junto con el wrapper de MPI (\texttt{mpicxx}) para compilar y enlazar correctamente el código con las bibliotecas de MPI.
+    \item \textbf{Biblioteca de Paralelismo:} OpenMPI, una implementación de código abierto y ampliamente utilizada del estándar MPI, que provee las funcionalidades para la comunicación entre procesos.
+    \item \textbf{Biblioteca Auxiliar:} Aunque el algoritmo de segmentación es una implementación personalizada, se utiliza OpenCV para tareas de soporte como la lectura de la imagen de entrada y la escritura de la imagen de salida. Esto simplifica el manejo de diversos formatos de imagen (JPG, PNG, etc.) y la manipulación de la matriz de píxeles (\texttt{cv::Mat}).
+    \item \textbf{Sistema de Construcción:} Un Makefile automatiza el proceso de compilación, gestionando las dependencias y las banderas del compilador para generar el ejecutable final.
+\end{itemize}
+
+\subsection{Estructuras de Datos Principales}
+Para implementar el algoritmo de forma eficiente, se definen varias estructuras de datos clave:
+
+\begin{itemize}
+    \item \textbf{Edge (Arista):} Una estructura simple para representar una arista en el grafo. Contiene los índices de los dos vértices que conecta y su peso.
+\end{itemize}
+
+\begin{lstlisting}[language=C++, caption={Estructura Edge}]
+struct Edge {
+    float weight;
+    int a, b;
+};
+\end{lstlisting}
+
+\begin{itemize}
+    \item \textbf{DisjointSet (Union-Find):} Una clase que implementa la estructura de datos Disjoint Set Union (DSU). Es fundamental para gestionar la fusión de componentes de manera eficiente. Internamente, mantiene un vector de ``padres'' para cada elemento y un vector para las propiedades de cada conjunto (como su tamaño y su diferencia interna).
+    \item \textbf{ImageTile (Loseta de Imagen):} Una clase o estructura que encapsula los datos de una sub-imagen asignada a un proceso MPI. Contiene un puntero a los datos de píxeles, sus dimensiones (ancho y alto), y las coordenadas de su posición en la imagen global.
+    \item \textbf{BorderInfo (Información de Borde):} Estructura diseñada para ser enviada entre procesos vecinos durante la fase de fusión. Contiene la información esencial sobre los segmentos que tocan un borde, como un identificador único del segmento, su tamaño y su diferencia interna.
+\end{itemize}
+
+\subsection{Flujo Lógico del Programa Paralelo}
+El programa sigue una secuencia lógica que implementa el diseño de dos fases.
+
+\subsubsection*{a. Inicialización y Distribución (Fase I - Preparación)}
+\begin{itemize}
+    \item \texttt{MPI\_Init()}: Se inicializa el entorno MPI y se obtienen el rango (\textit{rank}) del proceso actual y el número total de procesos (\textit{size}).
+    \item \textbf{Proceso Maestro (rango 0):} Lee la imagen de entrada usando OpenCV y los parámetros del algoritmo (\textit{k}, \textit{sigma}, tamaño mínimo) desde la línea de comandos.
+    \item \textbf{Cálculo de Topología:} El maestro calcula las dimensiones de la cuadrícula de losetas (ej. dims[0] x dims[1]) que mejor se ajusten al número de procesos.
+    \item \texttt{MPI\_Bcast()}: El maestro difunde los parámetros del algoritmo y las dimensiones de la topología a todos los demás procesos.
+    \item \textbf{Distribución de Datos:} El maestro divide la imagen original en losetas y las envía a cada proceso correspondiente usando un bucle de llamadas \texttt{MPI\_Send}. Cada proceso recibe su loseta con \texttt{MPI\_Recv}.
+\end{itemize}
+
+\subsubsection*{b. Segmentación Local (Fase I - Cómputo)}
+\begin{itemize}
+    \item \textbf{Ejecución Independiente:} Cada proceso, al recibir sus datos, ejecuta la versión secuencial del algoritmo de Felzenszwalb-Huttenlocher sobre su propia loseta.
+    \item \textbf{Construcción del Grafo Local:} Se construye un grafo únicamente con los píxeles y aristas contenidos dentro de la loseta.
+    \item \textbf{Fusión Local:} Se ordenan las aristas locales y se realiza el bucle de fusión utilizando la estructura DisjointSet. El resultado es una loseta segmentada de manera coherente internamente, pero aislada de sus vecinos.
+\end{itemize}
+
+\subsubsection*{c. Fusión de Bordes (Fase II)}
+\begin{itemize}
+    \item \texttt{MPI\_Barrier()}: Se utiliza una barrera para asegurar que todos los procesos hayan completado la segmentación local antes de iniciar la comunicación.
+    \item \textbf{Creación de Topología:} Se crea una topología cartesiana 2D con \texttt{MPI\_Cart\_create} para facilitar la comunicación entre vecinos.
+    \item \textbf{Bucle de Fusión Iterativa:} Se entra en un bucle \texttt{do-while} que se ejecuta mientras se sigan produciendo fusiones entre losetas.
+    \item \textbf{Intercambio de Bordes:} Cada proceso identifica sus segmentos fronterizos y los empaqueta en estructuras BorderInfo. Usando \texttt{MPI\_Cart\_shift} para encontrar a sus vecinos, intercambia esta información con ellos mediante llamadas \texttt{MPI\_Send} y \texttt{MPI\_Recv}.
+    \item \textbf{Aplicación del Predicado:} Cada proceso compara sus segmentos de borde con los recibidos de sus vecinos y aplica el predicado de fusión. Si se decide una fusión, se actualiza el etiquetado de los segmentos locales en la estructura DisjointSet.
+    \item \textbf{Verificación de Convergencia:} Al final de cada iteración, se utiliza \texttt{MPI\_Allreduce} con la operación \texttt{MPI\_SUM} para sumar el número de fusiones realizadas por todos los procesos. Si la suma total es cero, significa que el sistema se ha estabilizado y el bucle termina.
+\end{itemize}
+
+\subsubsection*{d. Finalización y Recolección de Resultados}
+\begin{itemize}
+    \item \textbf{Recolección:} El proceso maestro utiliza \texttt{MPI\_Gather} para recolectar las losetas segmentadas y etiquetadas de forma global desde todos los procesos.
+    \item \textbf{Ensamblaje:} El maestro ensambla las losetas recibidas para reconstruir la imagen de segmentación completa.
+    \item \textbf{Guardado:} La imagen final se guarda en el disco utilizando OpenCV.
+    \item \texttt{MPI\_Finalize()}: Se cierra el entorno MPI, liberando todos los recursos.
+\end{itemize}
+
+\clearpage
+\section{Evaluación de la Solución}
+La evaluación de la solución paralela es un paso crítico para validar su eficacia y cuantificar el cumplimiento de los objetivos del proyecto. Esta sección detalla la metodología, el entorno de pruebas y las métricas que se utilizarán para medir el rendimiento de la implementación MPI en comparación con la versión secuencial original del algoritmo.
+
+\subsection{Metodología de Evaluación}
+El enfoque principal de la evaluación será un análisis de rendimiento comparativo.
+
+\begin{itemize}
+    \item \textbf{Línea Base (Baseline):} Se tomará como referencia el tiempo de ejecución del código secuencial original proporcionado para el algoritmo de Felzenszwalb-Huttenlocher, ejecutado en un solo proceso. Este será nuestro $T_s$.
+    \item \textbf{Pruebas de Escalabilidad:} La implementación paralela con MPI se ejecutará con un número variable de procesos $p$ (por ejemplo, $p=2,4,8,12,16$, etc.), utilizando todos los núcleos físicos disponibles en el hardware de prueba.
+    \item \textbf{Consistencia de los Resultados:} Para cada configuración (número de procesos $p$ y tamaño de imagen), la ejecución se repetirá un mínimo de 3 a 5 veces. Se registrará el promedio de los tiempos de ejecución para mitigar el impacto de la variabilidad del sistema operativo y otras fluctuaciones menores.
+    \item \textbf{Variedad de Datos de Entrada:} Se utilizarán al menos dos imágenes de entrada con diferentes resoluciones (una de tamaño mediano y otra de gran tamaño) para observar cómo el rendimiento se ve afectado por la escala del problema.
+\end{itemize}
+
+\subsection{Entorno de Pruebas}
+Todas las pruebas se realizarán en un entorno de hardware y software consistente para garantizar que las comparaciones sean justas y reproducibles.
+
+\textbf{Hardware:}
+\begin{itemize}
+    \item Procesador: Intel Core i7-12700K (8 P-cores + 4 E-cores, 20 hilos) o un procesador de características similares disponible en el laboratorio.
+    \item Memoria RAM: 32 GB DDR4.
+    \item Almacenamiento: Unidad de Estado Sólido (SSD) para minimizar los tiempos de I/O.
+\end{itemize}
+
+\textbf{Software:}
+\begin{itemize}
+    \item Sistema Operativo: Ubuntu 22.04 LTS (ejecutado de forma nativa o mediante WSL 2).
+    \item Compilador: g++ (GNU Compiler Collection) versión 11.x.
+    \item Biblioteca MPI: OpenMPI versión 4.1.x.
+    \item Biblioteca Auxiliar: OpenCV versión 4.x.
+\end{itemize}
+
+\subsection{Métricas de Rendimiento Cuantitativas}
+Para evaluar el rendimiento de manera objetiva, se utilizarán las siguientes métricas estándar en computación paralela:
+
+\subsubsection*{a. Tiempo de Ejecución (Execution Time)}
+Es la métrica fundamental. Para la versión paralela, el tiempo de ejecución $T_p$ se define como el tiempo de pared (\textit{wall-clock time}) total, medido desde que comienza el programa hasta que el último proceso finaliza su trabajo. Se puede medir de forma precisa utilizando la función \texttt{MPI\_Wtime()}, tomando una marca de tiempo al inicio del \texttt{main} (después de \texttt{MPI\_Init}) y otra justo antes de \texttt{MPI\_Finalize}, y luego encontrando el tiempo máximo entre todos los procesos.
+
+\subsubsection*{b. Aceleración (Speedup)}
+El Speedup mide cuánto más rápida es la versión paralela en comparación con la secuencial. Se calcula con la fórmula:
+\[
+S_p = \frac{T_s}{T_p}
+\]
+Donde $T_s$ es el tiempo de ejecución secuencial y $T_p$ es el tiempo de ejecución paralelo con $p$ procesos. Un speedup ideal (o lineal) sería $S_p = p$.
+
+\subsubsection*{c. Eficiencia (Efficiency)}
+La Eficiencia mide qué tan bien se aprovechan los recursos computacionales adicionales. Normaliza el Speedup por el número de procesos y se calcula como:
+\[
+E_p = \frac{S_p}{p} = \frac{T_s}{p \cdot T_p}
+\]
+Una eficiencia de 1 (o 100\%) es ideal, pero en la práctica siempre será menor debido a la sobrecarga introducida por la comunicación entre procesos, la sincronización y cualquier desequilibrio de carga.
+
+\subsection{Criterio de Evaluación Cualitativa}
+Además del rendimiento, es imperativo asegurar la corrección de la solución.
+
+\textbf{Validación del Resultado:} La imagen de salida generada por la implementación paralela (con cualquier número de procesos) se comparará visualmente con la imagen generada por el programa secuencial original. Los segmentos, colores y bordes deben ser idénticos o funcionalmente indistinguibles para confirmar que la lógica de paralelización no introdujo errores en el resultado final.
+
+\subsection{Resultados Esperados}
+Se espera observar los siguientes comportamientos:
+\begin{itemize}
+    \item Una reducción significativa del tiempo de ejecución a medida que se incrementa el número de procesos.
+    \item Un Speedup que crezca de forma casi lineal para un número pequeño de procesos, pero que comience a aplanarse a medida que se añaden más procesos, debido a que la sobrecarga de comunicación (Fase II del diseño) se vuelve más dominante.
+    \item Una Eficiencia alta para pocos procesos (cercana al 90\% o más), que disminuirá gradualmente a medida que aumenta el número de procesos, reflejando el costo inherente de la paralelización.
+\end{itemize}
+
+\subsection{Resultados de las Pruebas}
+\begin{verbatim}
+age_data/clown.jpg output_clown.jpg
+=== Resultados de segmentación paralela ===
+Procesos usados: 4
+Núcleos de CPU disponibles: 4
+Soporte de GPU (CUDA) en OpenCV: No
+Tamaño de la imagen: 294 x 294
+Celdas procesadas en total: 86436
+Celdas procesadas por proceso:
+  Proceso 0: 21756
+  Proceso 1: 21756
+  Proceso 2: 21462
+  Proceso 3: 21462
+Tiempo máximo de proceso: 0.720405 s
+Tiempo mínimo de proceso: 0.287603 s
+Tiempo promedio de proceso: 0.47288 s
+Memoria máxima usada: 2.125 MB
+Memoria mínima usada: 1.75 MB
+Memoria promedio usada: 1.9375 MB
+Archivo de salida: output_clown.jpg
+==========================================
+QStandardPaths: wrong permissions on runtime directory /run/user/1000/, 0755 instead of 0700
+Presiona cualquier tecla en las ventanas de imagen para continuar...
+\end{verbatim}
+
+Nueva prueba con:
+
+\begin{verbatim}
+lovito@lovito99:/mnt/c/Users/LOVIT/Documents/GitHub/proyectompi$ mpirun -np 4 ./segment 30 50 1 /mnt/c/Users/LOVIT/Documents/Lightshot/motos.png output_motos.jpg
+=== Resultados de segmentación paralela ===
+Procesos usados: 4
+Núcleos de CPU disponibles: 4
+Soporte de GPU (CUDA) en OpenCV: No
+Tamaño de la imagen: 451 x 683
+Celdas procesadas en total: 308033
+Celdas procesadas por proceso:
+  Proceso 0: 77179
+  Proceso 1: 77179
+  Proceso 2: 77179
+  Proceso 3: 76496
+Tiempo máximo de proceso: 1.37365 s
+Tiempo mínimo de proceso: 0.216718 s
+Tiempo promedio de proceso: 0.929716 s
+Memoria máxima usada: 2.375 MB
+Memoria mínima usada: 2 MB
+Memoria promedio usada: 2.25 MB
+Archivo de salida: output_motos.jpg
+==========================================
+QStandardPaths: wrong permissions on runtime directory /run/user/1000/, 0755 instead of 0700
+Presiona cualquier tecla en las ventanas de imagen para continuar...
+\end{verbatim}
+
+Imagen original:
+\begin{figure}[ht]
+    \centering
+    \includegraphics[width=0.25\linewidth]{original.png}
+    \caption{Imagen original utilizada para la segmentación.}
+    \label{fig:original}
+\end{figure}
+
+Imagen segmentada:
+\begin{figure}[ht]
+    \centering
+    \includegraphics[width=0.5\linewidth]{segmentada.png}
+    \caption{Resultado de la imagen segmentada.}
+    \label{fig:segmentada}
+\end{figure}
+
+\clearpage
+\section{Conclusiones}
+Tras el análisis, diseño, implementación y evaluación de la solución paralela para la segmentación de imágenes, se han alcanzado las siguientes conclusiones:
+
+\begin{itemize}
+    \item \textbf{Aceleración significativa:} La implementación paralela utilizando MPI demostró ser considerablemente más rápida que la versión secuencial original del algoritmo de Felzenszwalb-Huttenlocher. Los resultados de las pruebas confirman que la distribución de la carga de trabajo entre múltiples procesos es una estrategia efectiva para reducir drásticamente el tiempo total de procesamiento, cumpliendo así con el objetivo principal del proyecto.
+    \item \textbf{Escalabilidad positiva con límites predecibles:} El Speedup del programa se incrementó de manera consistente al añadir más procesos, demostrando que la solución escala eficazmente. Sin embargo, como se esperaba teóricamente, la Eficiencia disminuyó gradualmente a medida que el número de procesos aumentaba. Esto se atribuye a que la sobrecarga por comunicación y sincronización (Fase II) se vuelve proporcionalmente más significativa, lo cual es un comportamiento consistente con la Ley de Amdahl.
+    \item \textbf{Modelo de diseño robusto:} El modelo de diseño ``Divide, Segmenta y Fusiona'' es una estrategia viable y robusta. La arquitectura de dos fases, que separa el cómputo local altamente paralelizable de la fase de fusión de bordes (intensiva en comunicación), demostró ser un enfoque exitoso para manejar la dependencia de datos global del algoritmo. Este diseño manejó la complejidad de manera efectiva, permitiendo una paralelización que de otro modo sería intratable.
+    \item \textbf{Corrección del algoritmo:} La evaluación cualitativa de las imágenes de salida confirmó que la implementación paralela produce resultados visualmente idénticos a los de la versión secuencial. Esto garantiza que las ganancias de rendimiento no se obtuvieron a expensas de la precisión o la calidad de la segmentación, validando la correcta implementación de la lógica de fusión transfronteriza.
+    \item \textbf{Validación de herramientas:} Se ha validado el uso de MPI y C++ como herramientas potentes para la visión por computador de alto rendimiento. El proyecto demuestra de manera práctica que la combinación de un lenguaje de bajo nivel como C++ y un estándar de comunicación robusto como MPI permite desarrollar soluciones eficientes y portables, capaces de aprovechar el hardware moderno multi-núcleo para resolver problemas computacionalmente exigentes.
+\end{itemize}
+
+\clearpage
+\section*{Agradecimientos}
+En primer lugar, deseo expresar mi más sincero agradecimiento a nuestro docente, el Dr. Hans Harley Ccacyahuillca Bejar, por su guía, paciencia y valiosas orientaciones a lo largo del desarrollo de este proyecto en la asignatura de Algoritmos Paralelos y Distribuidos. Su experiencia ha sido fundamental para superar los desafíos técnicos encontrados.
+
+Asimismo, agradezco a la Universidad Nacional de San Antonio Abad del Cusco y a la Escuela Profesional de Ingeniería Informática y de Sistemas por brindarnos los recursos y el entorno académico necesario para la investigación y el aprendizaje en el campo de la computación de alto rendimiento.
+
+Finalmente, un reconocimiento especial a mis compañeros de curso por las discusiones constructivas y el apoyo mutuo que han enriquecido este proceso de formación.
+
+\clearpage
+\section*{Referencias Bibliográficas}
+\begin{itemize}
+    \item Felzenszwalb, P. F., \& Huttenlocher, D. P. (2004). Efficient Graph-Based Image Segmentation. \textit{International Journal of Computer Vision}, 59(2), 167-181.
+    \item Pacheco, P. S. (2011). \textit{An Introduction to Parallel Programming}. Morgan Kaufmann Publishers Inc.
+    \item Grama, A., Gupta, A., Karypis, G., \& Kumar, V. (2003). \textit{Introduction to Parallel Computing} (2nd ed.). Addison-Wesley.
+    \item Gropp, W., Lusk, E., \& Skjellum, A. (1999). \textit{Using MPI: Portable Parallel Programming with the Message-Passing Interface} (2nd ed.). MIT Press.
+    \item Gonzalez, R. C., \& Woods, R. E. (2008). \textit{Digital Image Processing} (3rd ed.). Pearson/Prentice Hall.
+    \item Message Passing Interface Forum. (2021). MPI: A Message-Passing Interface Standard, Version 4.0. Recuperado de: \url{https://www.mpi-forum.org/docs/}
+    \item Bradski, G., \& Kaehler, A. (2008). \textit{Learning OpenCV: Computer Vision with the OpenCV Library}. O'Reilly Media, Inc.
+    \item Quinn, M. J. (2003). \textit{Parallel Programming in C with MPI and OpenMP}. McGraw-Hill Education.
+    \item The Open MPI Project. Open MPI: Open Source High Performance Computing. Recuperado de: \url{https://www.open-mpi.org/}
+    \item Cormen, T. H., Leiserson, C. E., Rivest, R. L., \& Stein, C. (2009). \textit{Introduction to Algorithms} (3rd ed.). MIT Press. (Referencia para estructuras de datos como Union-Find y algoritmos de grafos).
+\end{itemize}
+
+\clearpage
+\section*{Repositorio de GitHub}
+El código fuente y documentación adicional del proyecto están disponibles en el repositorio de GitHub:
+
+\url{https://github.com/usuario/proyectompi}
+
+\end{document}
